@@ -1,20 +1,19 @@
 import { Observable, Subscription } from 'rxjs';
 import { useState, useEffect } from 'react';
 
-export default function useObservable<T = number | undefined>(
-    observable: Observable<T | undefined>,
-    initialState?: T): T | undefined {
-    const [state, setState] = useState<T | undefined>(initialState);
+export default function useObservable<T = number>(
+    observable: Observable<T>,
+    initialState: T,
+    complete?: () => T): T {
+    const [state, setState] = useState<T>(initialState);
 
     useEffect(() => {
         const subscription: Subscription = observable.subscribe(
-            (next: T | undefined) => {
-                setState(next);
-            },
+            (next: T) => setState(next),
             error => console.log(error),
-            () => setState(undefined));
+            () => complete && setState(complete()));
         return () => subscription.unsubscribe();
-    }, [observable])
+    }, [observable, complete])
 
     return state;
 }
